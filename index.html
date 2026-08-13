@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 项目主页</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+            padding-top: 0;
+        }
+
+        /* ===== 蓝色顶栏（最新更新） ===== */
+        .topbar {
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            color: #fff;
+            padding: 0.9rem 2rem;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .topbar.show {
+            display: flex;
+        }
+        .topbar .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            background: rgba(255,255,255,0.15);
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .topbar .content {
+            font-size: 1rem;
+            font-weight: 500;
+            flex: 1;
+            min-width: 0;
+            word-break: break-word;
+        }
+        .topbar .time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            white-space: nowrap;
+        }
+        .topbar .items {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.4rem 1.2rem;
+            flex: 1;
+        }
+        .topbar .items .item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .topbar .items .item .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #60a5fa;
+            display: inline-block;
+        }
+        /* 新增：顶栏链接样式 */
+        .topbar .items .item a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .topbar .items .item a:hover {
+            opacity: 0.75;
+            text-decoration: underline;
+        }
+
+        /* ===== 容器 ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem 1.5rem 2rem;
+        }
+
+        /* ===== 头部 ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .header h1 {
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header .badge {
+            background: #e2e8f0;
+            padding: 0.3rem 1rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: #334155;
+        }
+        .header .badge span {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        /* ===== 工具栏 ===== */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+        }
+        .status .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status .dot.loading {
+            background: #f59e0b;
+            animation: pulse 1.5s infinite;
+        }
+        .status .dot.success {
+            background: #22c55e;
+        }
+        .status .dot.error {
+            background: #ef4444;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0.5; transform: scale(0.9); }
+        }
+
+        .btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: #1e293b;
+        }
+        .btn:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+        .btn-primary {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        /* ===== 通知卡片区 ===== */
+        .notice-area {
+            margin-bottom: 2rem;
+            display: none;
+        }
+        .notice-area.show {
+            display: block;
+        }
+        .notice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .notice-card {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 6px solid #f59e0b;
+            border-radius: 16px;
+            padding: 1.2rem 1.8rem;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+        }
+        .notice-card .notice-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #92400e;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .notice-card .notice-label::before {
+            content: "📢";
+            font-size: 1rem;
+        }
+        .notice-card .notice-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #78350f;
+            margin: 0.2rem 0 0.1rem 0;
+        }
+        .notice-card .notice-title a {
+            color: #78350f;
+            text-decoration: none;
+        }
+        .notice-card .notice-title a:hover {
+            text-decoration: underline;
+        }
+        .notice-card .notice-content {
+            font-size: 0.95rem;
+            color: #451a03;
+            line-height: 1.6;
+        }
+        .notice-card .notice-meta {
+            margin-top: 0.4rem;
+            font-size: 0.75rem;
+            color: #92400e;
+            opacity: 0.7;
+        }
+
+        /* ===== 卡片网格 ===== */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        /* ===== 项目卡片 ===== */
+        .card {
+            position: relative;
+            border-radius: 16px;
+            padding: 1.5rem;
+            overflow: hidden;
+            color: #fff;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.25s;
+            background: #1e293b;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+        }
+        .card-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: blur(6px) brightness(0.55);
+            transform: scale(1.05);
+            z-index: 0;
+            transition: filter 0.3s;
+        }
+        .card:hover .card-bg {
+            filter: blur(4px) brightness(0.65);
+        }
+        .card.no-bg .card-bg {
+            display: none;
+        }
+        .card.no-bg {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+        }
+        .card-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .card .title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .card .title .tag {
+            font-size: 0.6rem;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+            padding: 0.15rem 0.7rem;
+            border-radius: 30px;
+            font-weight: 500;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .card .desc {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            opacity: 0.92;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.25);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .card .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            opacity: 0.8;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 0.6rem;
+            margin-top: 0.4rem;
+        }
+        .card .meta a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            background: rgba(255,255,255,0.15);
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .card .meta a:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: #94a3b8;
+            grid-column: 1 / -1;
+        }
+
+        /* ===== 社交链接栏（版权声明上方） ===== */
+        .social-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.8rem;
+            padding: 1.2rem 0 0.8rem 0;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
+        }
+        .social-bar a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: #334155;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            border: 1px solid #e2e8f0;
+        }
+        .social-bar a:hover {
+            background: #2563eb;
+            color: #fff;
+            border-color: #2563eb;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2);
+        }
+        .social-bar a svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+        /* 微信特殊悬浮提示 */
+        .social-bar .wechat-wrapper {
+            position: relative;
+        }
+        .social-bar .wechat-wrapper .wechat-qr-tip {
+            display: none;
+            position: absolute;
+            bottom: 58px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #fff;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .social-bar .wechat-wrapper:hover .wechat-qr-tip {
+            display: block;
+        }
+
+        /* ===== 底部版权 ===== */
+        .footer {
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .topbar { padding: 0.7rem 1rem; flex-direction: column; align-items: stretch; }
+            .topbar .label { align-self: flex-start; }
+            .header h1 { font-size: 1.4rem; }
+            .card { min-height: 170px; padding: 1.2rem; }
+            .social-bar { gap: 1rem; }
+            .social-bar a { width: 38px; height: 38px; }
+            .social-bar a svg { width: 18px; height: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== 蓝色顶栏 ===== -->
+<div class="topbar" id="topbar">
+    <span class="label">📌 最新更新</span>
+    <div class="items" id="topbarItems"></div>
+    <span class="time" id="topbarTime"></span>
+</div>
+
+<div class="container">
+    <!-- 头部 -->
+    <div class="header">
+        <h1>AI 项目展示页</h1>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <div class="status" id="statusIndicator">
+            <span class="dot" id="statusDot"></span>
+            <span id="statusText">初始化</span>
+        </div>
+        <button class="btn btn-primary" id="refreshBtn">↻ 刷新数据</button>
+    </div>
+
+    <!-- 通知卡片区 -->
+    <div class="notice-area" id="noticeArea">
+        <div class="notice-list" id="noticeList"></div>
+    </div>
+
+    <!-- 项目卡片 -->
+    <div id="cardContainer" class="grid">
+        <div class="empty">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📡</div>
+            <p>正在加载项目数据……</p>
+        </div>
+    </div>
+
+    <!-- ===== 社交链接栏（版权声明上方） ===== -->
+    <div class="social-bar">
+        <!-- 邮箱 -->
+        <a href="mailto:ziruiorg@groups.outlook.com" title="发送邮件" aria-label="Email">
+            <svg viewBox="0 0 24 24"><path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z"/><path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z"/></svg>
+        </a>
+        <!-- 主页 -->
+        <a href="https://zirui6.github.io/" target="_blank" title="访问主页" aria-label="Website">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </a>
+        <!-- GitHub -->
+        <a href="https://github.com/zirui6" target="_blank" title="访问 GitHub" aria-label="GitHub">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.205 11.387.6.113.82-.26.82-.58 0-.287-.01-1.05-.015-2.06-3.338.726-4.042-1.61-4.042-1.61-.546-1.39-1.335-1.76-1.335-1.76-1.09-.745.082-.73.082-.73 1.205.085 1.838 1.237 1.838 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.776.418-1.306.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.123-.3-.535-1.52.117-3.16 0 0 1.008-.322 3.3 1.23.96-.267 1.98-.4 3-.4s2.04.133 3 .4c2.29-1.552 3.3-1.23 3.3-1.23.653 1.64.24 2.86.118 3.16.768.84 1.233 1.91 1.233 3.22 0 4.61-2.804 5.62-5.476 5.92.43.37.824 1.102.824 2.22 0 1.602-.015 2.894-.015 3.287 0 .322.216.698.825.58C20.565 21.795 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <!-- 微信（带悬浮提示） -->
+        <div class="wechat-wrapper">
+            <a href="weixin://" title="联系微信" aria-label="WeChat">
+                <svg viewBox="0 0 24 24"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm11.12 5.346c0-3.531-3.401-6.392-7.593-6.392-4.192 0-7.594 2.861-7.594 6.392 0 3.53 3.402 6.392 7.594 6.392a8.284 8.284 0 002.398-.352.654.654 0 01.54.074l1.622.95a.274.274 0 00.143.04.246.246 0 00.246-.246c0-.056-.021-.112-.035-.166l-.344-1.299a.486.486 0 01.17-.545c1.475-1.043 2.459-2.58 2.459-4.308zm-7.99-1.816c-.54 0-.978-.44-.978-.982s.438-.982.978-.982c.54 0 .978.44.978.982s-.438.982-.978.982zm3.735 0c-.54 0-.978-.44-.978-.982s.438-.982.978-.982c.54 0 .978.44.978.982s-.438.982-.978.982z"/></svg>
+            </a>
+            <div class="wechat-qr-tip">联系微信</div>
+        </div>
+    </div>
+
+    <!-- 底部版权 -->
+    <div class="footer">
+        <span>© 2026 Zirui. All Rights Reserved.</span>
+        <span>v1.2 · 向AGI的目标前进</span>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 1. Airtable 配置
+    // ============================================================
+    const AIRTABLE_TOKEN = 'patdZcEB92LMLW3bQ.44a613d94083deff3df9f4fda69a7b7a6c851c56faf900b16c72c6ddff7021ea';
+    const AIRTABLE_BASE_ID = 'app9G6YeDcFq7g09r';
+    const TABLE_NAME = 'ai项目';        // 项目表
+    const TABLE_NOTICE = 'ai通知';     // 通知表（新增）
+    const API_URL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(TABLE_NAME)}`;
+    const API_URL_NOTICE = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(TABLE_NOTICE)}`;
+
+    // ============================================================
+    // 2. DOM 引用
+    // ============================================================
+    const topbar = document.getElementById('topbar');
+    const topbarItems = document.getElementById('topbarItems');
+    const topbarTime = document.getElementById('topbarTime');
+    const container = document.getElementById('cardContainer');
+    const noticeArea = document.getElementById('noticeArea');
+    const noticeList = document.getElementById('noticeList');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    // ============================================================
+    // 3. 工具函数
+    // ============================================================
+    function setStatus(type, message) {
+        statusDot.className = 'dot';
+        if (type === 'loading') {
+            statusDot.classList.add('loading');
+            statusText.textContent = message || '加载中…';
+        } else if (type === 'success') {
+            statusDot.classList.add('success');
+            statusText.textContent = message || '已就绪';
+        } else if (type === 'error') {
+            statusDot.classList.add('error');
+            statusText.textContent = message || '加载失败';
+        } else {
+            statusDot.style.background = '#94a3b8';
+            statusText.textContent = message || '就绪';
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function getField(record, ...keys) {
+        const fields = record.fields || {};
+        for (const key of keys) {
+            const val = fields[key];
+            if (val !== undefined && val !== null && val !== '') {
+                return val;
+            }
+        }
+        return null;
+    }
+
+    // ============================================================
+    // 4. 渲染函数（修改：通知来自 ai通知 表）
+    // ============================================================
+
+    // 4a. 渲染顶栏（来自 ai通知 表）
+    function renderTopbar(noticeRecords) {
+        // 筛选有 Name 的记录
+        const validRecords = noticeRecords.filter(record => {
+            const name = getField(record, 'Name', '名称', '标题');
+            return name !== null && name !== '';
+        });
+
+        if (validRecords.length === 0) {
+            topbar.classList.remove('show');
+            return;
+        }
+
+        // 按发布时间排序
+        validRecords.sort((a, b) => {
+            const aTime = getField(a, '发布时间', '发布时间', 'Created', '创建时间') || '';
+            const bTime = getField(b, '发布时间', '发布时间', 'Created', '创建时间') || '';
+            return bTime.localeCompare(aTime);
+        });
+
+        topbar.classList.add('show');
+
+        let itemsHtml = '';
+        validRecords.forEach(record => {
+            const name = getField(record, 'Name', '名称', '标题') || '未命名';
+            // 读取"打开链接"字段
+            const link = getField(record, '打开链接', '链接', 'URL', 'Link', '网址') || '';
+
+            // 如果有链接，用 <a> 包裹；否则只显示纯文本
+            const displayContent = link ?
+                `<a href="${escapeHtml(link)}" target="_blank">${escapeHtml(name)}</a>` :
+                escapeHtml(name);
+
+            itemsHtml += `
+                <span class="item">
+                    <span class="dot"></span>
+                    ${displayContent}
+                </span>
+            `;
+        });
+        topbarItems.innerHTML = itemsHtml;
+
+        // 显示最新时间
+        const latest = validRecords[0];
+        const latestTime = getField(latest, '发布时间', '发布时间', 'Created', '创建时间') || '';
+        topbarTime.textContent = latestTime ? `🕒 ${escapeHtml(latestTime)}` : '';
+    }
+
+    // 4b. 渲染通知卡片区（来自 ai通知 表）
+    function renderNotices(noticeRecords) {
+        const validRecords = noticeRecords.filter(record => {
+            const name = getField(record, 'Name', '名称', '标题');
+            return name !== null && name !== '';
+        });
+
+        if (validRecords.length === 0) {
+            noticeArea.classList.remove('show');
+            return;
+        }
+
+        noticeArea.classList.add('show');
+        let html = '';
+        validRecords.forEach(record => {
+            const name = getField(record, 'Name', '名称', '标题') || '通知';
+            const content = getField(record, '描述', 'Description', '说明', '内容') || '';
+            const link = getField(record, '打开链接', '链接', 'URL', 'Link', '网址') || '';
+            const updateTime = getField(record, '发布时间', '发布时间', 'Created', '创建时间') || '';
+
+            const titleDisplay = link ?
+                `<a href="${escapeHtml(link)}" target="_blank">${escapeHtml(name)}</a>` :
+                escapeHtml(name);
+
+            html += `
+                <div class="notice-card">
+                    <div class="notice-label">📢 详细通知</div>
+                    <div class="notice-title">${titleDisplay}</div>
+                    ${content ? `<div class="notice-content">${escapeHtml(content)}</div>` : ''}
+                    ${updateTime ? `<div class="notice-meta">🕒 ${escapeHtml(updateTime)}</div>` : ''}
+                </div>
+            `;
+        });
+        noticeList.innerHTML = html;
+    }
+
+    // 4c. 渲染项目卡片（不变，来自 ai项目 表）
+    function renderCards(records) {
+        if (!records || records.length === 0) {
+            container.innerHTML = `
+                <div class="empty">
+                    <div style="font-size: 2.5rem;">📭</div>
+                    <p>当前没有项目数据</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        records.forEach(record => {
+            const name = getField(record, '名称', 'Name', '项目名称', '标题') || '未命名项目';
+            const desc = getField(record, '描述', 'Description', '说明', '内容') || '暂无描述';
+            const statusField = getField(record, '状态', 'Status', '阶段') || '';
+            const url = getField(record, '链接', 'URL', '网址') || '';
+            const tags = getField(record, '标签', 'Tags', '分类') || '';
+            const bgImage = getField(record, '图片链接', 'Image', '背景图', '图片') || '';
+
+            let tagDisplay = '';
+            if (Array.isArray(tags)) {
+                tagDisplay = tags.filter(t => t).join(' · ');
+            } else if (typeof tags === 'string' && tags.trim()) {
+                tagDisplay = tags;
+            }
+
+            const statusBadge = statusField ? `<span class="tag">${escapeHtml(statusField)}</span>` : '';
+            const hasBg = bgImage && bgImage.trim() !== '';
+            const bgStyle = hasBg ? `background-image: url('${escapeHtml(bgImage)}');` : '';
+            const noBgClass = hasBg ? '' : 'no-bg';
+
+            html += `
+                <div class="card ${noBgClass}">
+                    ${hasBg ? `<div class="card-bg" style="${bgStyle}"></div>` : ''}
+                    <div class="card-content">
+                        <div class="title">
+                            ${escapeHtml(name)}
+                            ${statusBadge}
+                        </div>
+                        <div class="desc">${escapeHtml(desc)}</div>
+                        <div class="meta">
+                            <span>${tagDisplay ? `🏷️ ${escapeHtml(tagDisplay)}` : '📌 无标签'}</span>
+                            ${url ? `<a href="${escapeHtml(url)}" target="_blank">🔗 查看 →</a>` : '<span style="opacity:0.5;">无链接</span>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // ============================================================
+    // 5. 主加载（分别拉取两个表）
+    // ============================================================
+    async function fetchProjects() {
+        setStatus('loading', '正在请求 Airtable…');
+
+        try {
+            // 并行请求两个表
+            const [projectResponse, noticeResponse] = await Promise.all([
+                fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
+                        'Content-Type': 'application/json',
+                    },
+                }),
+                fetch(API_URL_NOTICE, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
+                        'Content-Type': 'application/json',
+                    },
+                })
+            ]);
+
+            // 检查响应
+            if (!projectResponse.ok) {
+                let errorMsg = `项目表 HTTP ${projectResponse.status}`;
+                try {
+                    const errBody = await projectResponse.json();
+                    if (errBody.error) errorMsg = errBody.error.message || errorMsg;
+                } catch (_) {}
+                throw new Error(`请求失败: ${errorMsg}`);
+            }
+            if (!noticeResponse.ok) {
+                let errorMsg = `通知表 HTTP ${noticeResponse.status}`;
+                try {
+                    const errBody = await noticeResponse.json();
+                    if (errBody.error) errorMsg = errBody.error.message || errorMsg;
+                } catch (_) {}
+                throw new Error(`请求失败: ${errorMsg}`);
+            }
+
+            const projectData = await projectResponse.json();
+            const noticeData = await noticeResponse.json();
+
+            const projectRecords = projectData.records || [];
+            const noticeRecords = noticeData.records || [];
+
+            const total = projectRecords.length + noticeRecords.length;
+            setStatus('success', `加载成功 · ${projectRecords.length} 个项目 · ${noticeRecords.length} 条通知`);
+
+            // 渲染
+            renderTopbar(noticeRecords);
+            renderNotices(noticeRecords);
+            renderCards(projectRecords);
+
+        } catch (err) {
+            console.error('加载错误:', err);
+            setStatus('error', `加载失败: ${err.message}`);
+            container.innerHTML = `
+                <div class="empty">
+                    <div style="font-size: 2.5rem;">⚠️</div>
+                    <p style="color: #ef4444; font-weight: 500;">${escapeHtml(err.message)}</p>
+                </div>
+            `;
+            topbar.classList.remove('show');
+            noticeArea.classList.remove('show');
+        }
+    }
+
+    // ============================================================
+    // 6. 启动
+    // ============================================================
+    fetchProjects();
+    refreshBtn.addEventListener('click', fetchProjects);
+
+    console.log('✅ AI 展示页 v0.5 启动，项目表:', TABLE_NAME);
+    console.log('📌 通知表:', TABLE_NOTICE);
+</script>
+</body>
+</html>
